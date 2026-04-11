@@ -186,18 +186,30 @@ if model is None:
 else:
     st.success("✅ Model loaded successfully!")
 
-# File uploader
-uploaded_file = st.file_uploader(
-    "Upload Voice Recording",
-    type=["wav", "mp3", "flac", "ogg"],
-    help="Supported formats: WAV, MP3, FLAC, OGG"
-)
+# Audio input selection
+tab_upload, tab_record = st.tabs(["📁 Upload Audio", "🎤 Record Live"])
 
-if uploaded_file is not None:
-    st.audio(uploaded_file, format='audio/wav')
+audio_source = None
+
+with tab_upload:
+    uploaded_file = st.file_uploader(
+        "Upload Voice Recording",
+        type=["wav", "mp3", "flac", "ogg"],
+        help="Supported formats: WAV, MP3, FLAC, OGG"
+    )
+    if uploaded_file is not None:
+        audio_source = uploaded_file
+
+with tab_record:
+    recorded_audio = st.audio_input("Record your voice")
+    if recorded_audio is not None:
+        audio_source = recorded_audio
+
+if audio_source is not None:
+    st.audio(audio_source, format='audio/wav')
 
     with st.spinner("🔄 Processing audio and running inference..."):
-        audio_bytes = uploaded_file.read()
+        audio_bytes = audio_source.read()
         mel_array, y_audio, sr = audio_to_melspectrogram(audio_bytes, CONFIG)
 
     if mel_array is not None:
